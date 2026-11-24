@@ -28,7 +28,7 @@ TaskFlow is a personal task manager: register and verify email, log in, create a
 - **Node.js 26 LTS** (pinned in `.nvmrc` and `engines`), TypeScript strict mode everywhere, **ES modules** in all three projects.
 - **Backend:** NestJS 12 (modular), TypeORM 1.x with `mysql2`, MariaDB **11.4 LTS**, class-validator, helmet.
 - **Frontend:** React 19, Vite, Ant Design 6, Redux Toolkit with RTK Query, React Router, React Hook Form (from M2).
-- **Tests:** **Vitest** (backend uses `unplugin-swc` for decorator metadata), React Testing Library, Supertest.
+- **Tests:** **Vitest** 5 (no SWC plugin needed; see decision B below), React Testing Library, Supertest.
 - **Tools:** MariaDB installed directly on my computer (no Docker), Mailpit from M2, Postman, Git and GitHub, GitHub Actions.
 
 ## Local database (overrides the plan's Docker setup)
@@ -86,6 +86,24 @@ taskflow/                 one Git repository, npm workspaces
 **Done-when adjustment:** instead of "`npm run db:up` starts MariaDB", check that the backend connects to my local MariaDB; for the "database down" check, stop the MariaDB service briefly.
 
 **Done when** every item in the plan's "Done when" checklist passes.
+
+## Implementation decisions (M0)
+
+Approved 24 November 2026; where they differ from the plan, they win.
+
+- **TypeScript `~6.0`** in all three projects (typescript-eslint 8 supports TypeScript below 6.1).
+- **A. Linting:** ESLint with `typescript-eslint` and `eslint-config-prettier`, not the generator's Oxlint.
+- **B. No SWC:** Vitest keeps decorator metadata without `unplugin-swc`/`@swc/core`. If a test shows dependency injection failing for lack of it, stop and propose adding SWC back.
+- **C. Vitest 5.1.1** in both apps; `@vitest/coverage-v8` always on exactly the same version as Vitest.
+- **D. Fully strict TypeScript:** `strictPropertyInitialization` stays on; class-validator classes mark properties with `!`.
+- **E. Shared response types:** `ErrorResponse`, `HealthResponse` and the codes `VALIDATION_FAILED`, `NOT_FOUND`, `INTERNAL_ERROR` live in `@taskflow/shared`.
+- **F. Backend `test` runs unit and e2e tests** (needs WampServer running and `.env.test`); `test:e2e` runs only e2e.
+- **G. Generator packages removed:** `@nestjs/mau` and its `deploy` script, `oxlint`, `oxlint-tsgolint`, `@nestjs/schematics`, `source-map-support`, and the backend's own `prettier` and `vite`. `@vitest/coverage-v8` is kept for `test:cov`.
+- **H. Generated files removed:** `AGENTS.md`, `README.md`, `.gitattributes`, `.prettierrc`, `.oxlintrc.json`, and the sample controller, service and tests.
+- **`src/app.setup.ts`** applies helmet and the `/api` prefix, for both `main.ts` and the e2e test.
+- **Request IDs** come from `src/common/logging/request-id.middleware.ts`, so unknown routes get one too.
+- **`data-source.ts`** loads `.env` with Node's built-in `process.loadEnvFile()` and checks it with the app's `validate` function.
+- **Migrations:** `npm run migration:generate -- src/database/migrations/<Name>`; no migration command runs against `taskflow` in M0.
 
 ## Keeping the handbook current
 
