@@ -107,6 +107,16 @@ Approved 24 November 2026; where they differ from the plan, they win.
 - **Request IDs** come from `src/common/logging/request-id.middleware.ts`, so unknown routes get one too.
 - **`data-source.ts`** loads `.env` with Node's built-in `process.loadEnvFile()` and checks it with the app's `validate` function.
 - **Migrations:** `npm run migration:generate -- src/database/migrations/<Name>`; no migration command runs against `taskflow` in M0.
+- **`LOG_LEVEL`** accepts `error`, `warn`, `info`, `debug`; `info` maps to NestJS's `log`.
+- **`src/config/app-config.module.ts`** is a global module that provides and exports `AppConfigService`.
+- **`src/database/data-source-options.ts`** holds the side-effect-free `buildDataSourceOptions()`; `data-source.ts` reads `.env` when loaded, so it is for migration commands only and never imported by the app.
+- **Health** returns its own `HealthResponse` (status 503 when the database is down) instead of throwing; it uses the plan's `{ status, database }` shape.
+- **Helmet** also sets `frameguard: { action: 'deny' }`; `Cache-Control: no-store` comes from a small middleware in `app.setup.ts` (helmet has no such option).
+- **Error status → code:** 404 `NOT_FOUND`, 5xx `INTERNAL_ERROR`, any other 4xx `VALIDATION_FAILED`; only messages our own code wrote reach the client.
+- **Shared types:** `HealthResponse` and `ErrorResponse` in `taskflow-shared/src/api-types.ts`; `ERROR_CODES` and `ErrorCode` in `error-codes.ts`.
+- **Paths outside `/api`** get the standard JSON 404 from a catch-all in `app.setup.ts`, not Express's HTML page.
+- **Validation errors:** one `fields` entry per field; unknown fields get the fixed message "This field is not allowed."
+- **Manual checks** use `curl.exe` (not `Invoke-WebRequest`, which loses error bodies) and wait up to 60–90 s for start-up.
 
 ## Keeping the handbook current
 
