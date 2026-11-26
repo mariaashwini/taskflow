@@ -6,3 +6,6 @@
  * the two sides can never disagree.
  */
 export const API_PREFIX = '/api';
+
+export type { ErrorResponse, HealthResponse } from './api-types.js';
+export { ERROR_CODES, type ErrorCode } from './error-codes.js';
