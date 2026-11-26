@@ -12,6 +12,7 @@ TaskFlow is a personal task manager: register and verify email, log in, create a
 | `docs/sign-off.md`                    | Sign-off report and decisions P1 to P4                                                                                                              |
 | `docs/project-initialization-plan.md` | **The plan for M0**: structure, dependencies, scripts, env, Git, database, done criteria                                                            |
 | `docs/PROJECT_DEVELOPMENT_GUIDE.md`   | My reusable handbook for building any project with Claude. Not TaskFlow-specific; not a source of TaskFlow requirements                             |
+| `docs/PROGRESS.md`                    | **Where the work stands:** current step, what's verified, the next action. Read it at the start of each session; update it at the end              |
 
 **Precedence:** v2 overrides v1 where they differ. The architecture's lead paragraph lists how P1 to P4 adjust it (folder names, Node 26, ES modules, Vitest instead of Jest).
 
