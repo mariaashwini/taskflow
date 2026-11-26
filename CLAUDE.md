@@ -22,6 +22,9 @@ TaskFlow is a personal task manager: register and verify email, log in, create a
 - **If something in the plan doesn't work as written** (a tool behaves differently, a version conflicts), stop and explain the problem and options. Don't silently work around it.
 - Prefer the official generators (NestJS CLI, Vite template), then remove their sample code.
 - Never commit secrets or `.env` files. Never run destructive commands (deleting volumes, force-pushing, resetting Git history) without asking first.
+- Before every command or file change that needs my approval, explain it in 2–4 short,
+  plain-language lines: what it does, what it changes (files, database, network, or
+  nothing), whether it can be undone, and what result to expect.
 
 ## Approved stack
 
