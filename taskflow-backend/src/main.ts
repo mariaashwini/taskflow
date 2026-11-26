@@ -8,7 +8,9 @@ async function bootstrap() {
   // (imports only load code); CI and production also set TZ=UTC themselves.
   process.env.TZ = 'UTC';
 
-  const app = await NestFactory.create(AppModule);
+  // Hold start-up log lines until setupApp() installs our logger, so they too
+  // follow LOG_LEVEL and the production JSON format.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
   // Close the database pool cleanly when the process is stopped (Ctrl+C, deploys).
   app.enableShutdownHooks();
   setupApp(app);

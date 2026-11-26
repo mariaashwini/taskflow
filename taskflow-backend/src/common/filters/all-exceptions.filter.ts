@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ERROR_CODES, type ErrorCode, type ErrorResponse } from '@taskflow/shared';
+import { redact } from '../logging/redact.js';
 
 /**
  * Safe, generic messages, used whenever we didn't write a message ourselves.
@@ -67,13 +68,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (dbCode !== undefined) {
       // MariaDB messages can contain the submitted value: log only the driver code.
-      this.logger.error(`requestId=${requestId} ${type} code=${dbCode}`);
+      this.logger.error(redact({ requestId, type, code: dbCode }));
       return;
     }
 
-    const msg = exception instanceof Error ? exception.message : String(exception);
+    const message = exception instanceof Error ? exception.message : String(exception);
     const stack = exception instanceof Error ? exception.stack : undefined;
-    this.logger.error(`requestId=${requestId} ${type}: ${msg}`, stack);
+    this.logger.error(redact({ requestId, type, message }), stack);
   }
 }
 

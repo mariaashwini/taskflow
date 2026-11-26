@@ -1,14 +1,36 @@
-import type { INestApplication } from '@nestjs/common';
+import type { INestApplication, LogLevel as NestLogLevel } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { API_PREFIX, ERROR_CODES, type ErrorResponse } from '@taskflow/shared';
 import { DEFAULT_MESSAGES } from './common/filters/all-exceptions.filter.js';
+import { AppLogger } from './common/logging/app-logger.js';
 import { requestIdMiddleware } from './common/logging/request-id.middleware.js';
 import { AppConfigService } from './config/app-config.service.js';
+import type { LogLevel } from './config/env.validation.js';
+
+/**
+ * Our LOG_LEVEL names → the NestJS levels to print. Each level includes the
+ * more serious ones. NestJS calls "info" `log`; request lines use it.
+ */
+const NEST_LOG_LEVELS: Record<LogLevel, NestLogLevel[]> = {
+  error: ['fatal', 'error'],
+  warn: ['fatal', 'error', 'warn'],
+  info: ['fatal', 'error', 'warn', 'log'],
+  debug: ['fatal', 'error', 'warn', 'log', 'debug', 'verbose'],
+};
 
 /** Shared by main.ts and the e2e tests, so tests run the app exactly as it really starts. */
 export function setupApp(app: INestApplication): void {
   const config = app.get(AppConfigService);
+
+  // Readable text locally (UTC timestamps); one JSON object per line in production, for log tools.
+  // Start-up lines buffered so far (main.ts: bufferLogs) are printed with this logger.
+  app.useLogger(
+    new AppLogger({
+      logLevels: NEST_LOG_LEVELS[config.logLevel],
+      json: config.nodeEnv === 'production',
+    }),
+  );
 
   // First of all: give the request its ID, so everything after can use it.
   app.use(requestIdMiddleware);

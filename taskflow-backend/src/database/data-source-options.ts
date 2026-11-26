@@ -31,8 +31,10 @@ export function buildDataSourceOptions(db: DbConfig): DataSourceOptions {
     synchronize: false,
     // Starting the app never runs migrations by surprise.
     migrationsRun: false,
-    // No SQL statements or parameter values in the logs.
-    logging: ['error', 'warn', 'migration'],
+    // No SQL statements or parameter values in the logs. 'error' is left out on
+    // purpose: TypeORM would print the failed query with its parameter values.
+    // Failed queries still reach the exception filter, which logs only the driver code.
+    logging: ['warn', 'migration'],
     ssl: db.ssl ? { rejectUnauthorized: true } : undefined,
   };
 }

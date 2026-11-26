@@ -9,8 +9,8 @@ _Last updated: 26 November 2026_
 
 - **Milestone:** M0, Project Initialization. Branch `m0-foundation`.
 - **Step:** 4 of 7, Backend.
-- **Sub-step:** Logging (`redact()` and the logging interceptor). Designed, **not started**.
-- **Git:** `m0-foundation` pushed to GitHub (`origin`) up to `c9ed6ca` on 26 November 2026, tracking `origin/m0-foundation`.
+- **Sub-step:** Logging done and verified, **not committed yet**. Next: ESLint with the TypeORM import rule.
+- **Git:** `m0-foundation` pushed to GitHub (`origin`) up to `6a08d1f` on 26 November 2026, tracking `origin/m0-foundation`.
   No pull request and no CI workflow yet; the pull request is opened in step 7 (Review), once CI exists and is green.
 
 ## Step 4 (Backend): status
@@ -24,8 +24,8 @@ _Last updated: 26 November 2026_
 | Health check `GET /api/health` | Done, verified |
 | Global exception filter | Done, verified |
 | Global validation pipe | Done, verified |
-| Logging: `redact()` and interceptor | **Next** |
-| ESLint with the TypeORM import rule; `lint` and `typecheck` scripts | To do |
+| Logging: `redact()` and interceptor | Done, verified |
+| ESLint with the TypeORM import rule; `lint` and `typecheck` scripts | **Next** |
 | Test setup and health e2e test (`taskflow_test`, `.env.test`) | To do |
 
 ### What has been verified
@@ -52,6 +52,12 @@ _Last updated: 26 November 2026_
   - Each field gets one entry; nested fields are written as `address.city`.
   - Submitted values are never echoed.
   - The filter answers `400 VALIDATION_FAILED` with `fields` and the request ID.
+- **Logging:**
+  - `redact()` (throwaway script): all ten keys in any letter case and at any depth, arrays, a circular object (`[Circular]`), a shared object, the original unchanged.
+  - `/api/health?token=abc123` gives one request line with `route: '/api/health'`, status, duration and request ID; `abc123` is nowhere in the log.
+  - Unknown routes get no request line (the accepted limitation below).
+  - `LOG_LEVEL=warn`: no request lines. `NODE_ENV=production`: one JSON object per line, the request fields as real JSON fields.
+  - Invalid config (`LOG_LEVEL=bogus`) still fails at start-up and names the variable, without its value (`bufferLogs` hides nothing).
 
 ### Not yet tested
 
@@ -91,6 +97,7 @@ _Last updated: 26 November 2026_
 
 - **The interceptor's limitation (accepted, following the architecture):** NestJS runs interceptors only for requests that reach a route. Unknown routes (404s from the filter or the non-`/api` catch-all) get no request line. From M2, neither will requests stopped by guards (401, 403). Server errors are still logged by the filter. The alternative, a logging middleware, sees every request but departs from the documented design.
 - **Request ID fallback:** if a request ever lacked an ID, the non-`/api` catch-all would use `'unknown'`, while the filter creates a fresh random ID. It can't happen in practice, because the request-ID middleware runs first.
+- **UTC log timestamps (`src/common/logging/app-logger.ts`, approved 26 November 2026):** NestJS's `ConsoleLogger` creates its date formatter when imported, before `main.ts` sets `TZ=UTC`, so text-mode logs showed local time. `AppLogger` extends `ConsoleLogger` and only overrides `getTimestamp()` to return ISO 8601 UTC (`2026-11-26T15:06:12.162Z`). Verified. Production JSON timestamps (numbers) are unchanged.
 - **Field messages:** validation messages are class-validator's built-in English texts until M2 adds our own in `@taskflow/shared` (`messages.ts`).
 - **Slow first start:** the backend can take about 25 seconds to start the first time after a pause, probably because Windows scans `node_modules`. It isn't a bug. One earlier check run also wrote no app log, and the cause is unknown; it hasn't happened again.
 
