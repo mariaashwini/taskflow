@@ -10,6 +10,8 @@ _Last updated: 26 November 2026_
 - **Milestone:** M0, Project Initialization. Branch `m0-foundation`.
 - **Step:** 4 of 7, Backend.
 - **Sub-step:** Logging (`redact()` and the logging interceptor). Designed, **not started**.
+- **Git:** `m0-foundation` pushed to GitHub (`origin`) up to `c9ed6ca` on 26 November 2026, tracking `origin/m0-foundation`.
+  No pull request and no CI workflow yet; the pull request is opened in step 7 (Review), once CI exists and is green.
 
 ## Step 4 (Backend): status
 
